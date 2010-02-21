@@ -9,12 +9,12 @@
 class Square
 {
  private:
-  vector<int> myStack;
+  std::vector<int> myStack;
  public:
   Square();
   Square(int player);
-  string print(int row);
-  vector<int> getmyStack();
+  std::string print(int row);
+  std::vector<int> getmyStack();
   bool lift(int player);
   bool drop(int shell);
   int top(); //return just the top shell

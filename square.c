@@ -1,8 +1,9 @@
-#include <math.h>
+#include <cmath>
 #include <algorithm>
 #include <vector>
-#include <iostream.h>
+#include <iostream>
 #include "square.h"
+using namespace std;
 
 Square::Square()
 {

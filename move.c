@@ -1,6 +1,7 @@
 #include "move.h"
-#include <iostream.h>
+#include <iostream>
 #include <string>
+using namespace std;
 
 bool Move::setOrigin(int row, int col)
 {

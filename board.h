@@ -20,11 +20,11 @@ class Board
   Square whiteStart[3];         // White's starting stacks
   Square blackStart[3];         // Black's starting stacks
   int whoseTurn;
-  vector<Move> allMoves; // all origin-destination combos
+  std::vector<Move> allMoves; // all origin-destination combos
 
   //member-functions
   bool isPseudoLegal(Move thisMove, int player); // does not check for moves into check
-  vector<Move> getAllPseudoLegalMoves(int player); // does not check for moves into check
+  std::vector<Move> getAllPseudoLegalMoves(int player); // does not check for moves into check
   bool hasFourInARow(int player);
   bool tryMove(Move thisMove, int player); // simply applies Move -- doesn't check anything -- private only
   bool undoMove(Move thisMove, int player); // same as above
@@ -43,7 +43,7 @@ class Board
   void print();
   bool isInCheck(int player);  // is player currently in check
   bool isLegal(Move thisMove, int player); //can player make Move
-  vector<Move> getAllLegalMoves(int player);
+  std::vector<Move> getAllLegalMoves(int player);
   bool makeMove(Move thisMove, int player);
   Board testMove(Move thisMove, int player);
   bool hasWon(int player);     // has player currently won

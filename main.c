@@ -1,4 +1,4 @@
-#include <iostream.h>
+#include <iostream>
 #include <vector>
 #include "human.h"
 #include "move.h"
@@ -28,9 +28,9 @@ int main()
   } while ( !(myBoard.hasWon(1)) && !(myBoard.hasWon(-1)) );
   
   myBoard.print();
-  char* white = "\033[40;45m";
-  char* black = "\033[40;46m";
-  char* reset = "\033[m";
+  const char* white = "\033[40;45m";
+  const char* black = "\033[40;46m";
+  const char* reset = "\033[m";
 
   if (myBoard.hasWon(1)) {
     cout << white << "WHITE";

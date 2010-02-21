@@ -3,8 +3,10 @@
 #include "board.h"
 #include "move.h"
 #include "square.h"
-#include <iostream.h>
+#include <iostream>
 #include <vector>
+#include <stdlib.h>
+#include <stdio.h>
 
 #define ROWS 4
 #define COLS 4
@@ -287,7 +289,7 @@ int Board::getWhoseTurn() {
 
 void Board::print()
 {
-  bool displayMoves = false;
+  bool displayMoves = true;
 
   cout << endl;
   cout << "      ";
@@ -318,8 +320,7 @@ void Board::print()
   myMoves = getAllLegalMoves(whoseTurn);
   int numMoves = myMoves.size();
   int lineCount = 0;
-  //  if (numMoves < 9) displayMoves = true;
-  displayMoves = true;
+
   if (displayMoves) {
     cout << "All " << numMoves << " Legal Moves:";
   }

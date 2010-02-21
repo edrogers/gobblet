@@ -1,4 +1,4 @@
-#include <iostream.h>
+#include <iostream>
 #include "move.h"
 #include "square.h"
 #include "board.h"
