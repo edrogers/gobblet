@@ -1,3 +1,21 @@
+% Instructions to compile 
+%
+% You need g++ and the standard libraries of C++
+% For Ubuntu or a debian-like system, try
+sudo aptitude install build-essential
+% Then to compile, I use:
+find . -type f -name '*.c' ! -name 'main.c' | xargs g++ -o main main.c
+% Then to play, just:
+./main
+
+% To pick up on the game against Liam last week,
+% copy the contents of liam-white--eamon-black.txt
+% to the clipboard, start the game, and paste directly
+% into the game.  It is then Liam's (white's) turn
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 Gobblet -- A board game made by Blue Orange
 Ed Rogers has been working on making an online version of this game (without permission -- please don't sue!)
 
