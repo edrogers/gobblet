@@ -37,8 +37,8 @@ void Bot::setPlayerNum(int thisNum)
 
 Move Bot::chooseMove(Board thisBoard){  
 
-  ofstream logfile;
-  logfile.open("log.txt", ios_base::app);
+  /* ofstream logfile; */
+  /* logfile.open("log.txt", ios_base::app); */
 
   int depth = 1;
 
@@ -90,18 +90,21 @@ Move Bot::chooseMove(Board thisBoard){
     //    srand((unsigned)time(0));
     srand(0);
     int kindaRandom = rand()%allLegal.size();
-    logfile << "Random Move to start" << endl;
-    logfile << (allLegal[kindaRandom]).getOriginRow() << "," << (allLegal[kindaRandom]).getOriginCol() << " -> ";
-    logfile << (allLegal[kindaRandom]).getDestinationRow() << "," << (allLegal[kindaRandom]).getDestinationCol() << endl;
-    logfile.close();
+    /* logfile << "Random Move to start" << endl; */
+    /* logfile << (allLegal[kindaRandom]).getOriginRow() << "," << (allLegal[kindaRandom]).getOriginCol() << " -> "; */
+    /* logfile << (allLegal[kindaRandom]).getDestinationRow() << "," << (allLegal[kindaRandom]).getDestinationCol() << endl; */
+    /* logfile.close(); */
     return allLegal[kindaRandom];
   }
 
 
-  logfile << "Reordering Moves" << endl;
-  logfile << "  Starting with " << allLegal.size() << " legal moves." << endl;
-  vector<Move> OrderedMoves = ReorderMoves(allLegal,thisBoard, logfile);
-  logfile << "  End up with " << OrderedMoves.size() << " legal moves." << endl;
+  /* logfile << "Reordering Moves" << endl; */
+  /* logfile << "  Starting with " << allLegal.size() << " legal moves." << endl; */
+  /* vector<Move> OrderedMoves = ReorderMoves(allLegal,thisBoard, logfile); */
+  /* logfile << "  End up with " << OrderedMoves.size() << " legal moves." << endl; */
+
+  vector<Move> OrderedMoves = ReorderMoves(allLegal,thisBoard);
+
   Move FavoriteMoveSoFar = OrderedMoves[0]; // Just start with whatever
   
   float alpha = -999999.9;
@@ -121,12 +124,12 @@ Move Bot::chooseMove(Board thisBoard){
     }
   }
 
-  logfile << (FavoriteMoveSoFar).getOriginRow() << "," << (FavoriteMoveSoFar).getOriginCol() << " -> ";
-  logfile << (FavoriteMoveSoFar).getDestinationRow() << "," << (FavoriteMoveSoFar).getDestinationCol() << endl;
+  /* logfile << (FavoriteMoveSoFar).getOriginRow() << "," << (FavoriteMoveSoFar).getOriginCol() << " -> "; */
+  /* logfile << (FavoriteMoveSoFar).getDestinationRow() << "," << (FavoriteMoveSoFar).getDestinationCol() << endl; */
   FavoriteMoveSoFar.print();
   cout << endl;
 
-  logfile.close();
+  /* logfile.close(); */
   return FavoriteMoveSoFar;
 }
 
@@ -461,6 +464,85 @@ vector<Move> Bot::ReorderMoves(vector<Move> ListOfMoves, Board thisBoard, ofstre
 /*   return OrderedList; */
 }
 
+vector<Move> Bot::ReorderMoves(vector<Move> ListOfMoves, Board thisBoard) {
+  int PlayerToMove = thisBoard.getWhoseTurn();
+
+/*   // Start of game, skip all this reordering */
+/*   int NMyPiecesOnBoard = 0; */
+/*   for (int iRow=0; iRow != 4; iRow++) { */
+/*     for (int iCol=0; iCol != 4; iCol++) { */
+/*       Square thisSquare = thisBoard.getSquare(iRow,iCol); */
+/*       if (thisSquare.top()*PlayerToMove > 0) */
+/* 	NMyPiecesOnBoard++; */
+/*     } */
+/*   } */
+/*   if (NMyPiecesOnBoard < 3)  */
+/*     return ListOfMoves; */
+
+
+/*   vector<Move> OrderedList; */
+
+  vector<Move> BigList;
+  vector<Move> DiagBigList;
+  vector<Move> NoSelfDiagBigList;
+
+  // First (and least important) tweak, the bigger pieces the better
+  for (int pieceSize=4; pieceSize > 0; pieceSize--) {
+    for (vector<Move>::iterator thisMove = ListOfMoves.begin();
+	 thisMove != ListOfMoves.end(); ) {
+      int OriginRow = thisMove->getOriginRow();
+      int OriginCol = thisMove->getOriginCol();
+      Square thisSquare = thisBoard.getSquare(OriginRow,OriginCol);
+      if (abs(thisSquare.top()) == pieceSize) {
+	BigList.push_back(*thisMove);
+	ListOfMoves.erase(thisMove);
+	continue;
+      }
+      thisMove++;
+    }
+  }
+
+  // Check moves to squares on diagonals before others
+  for (vector<Move>::iterator thisMove = BigList.begin();
+       thisMove != BigList.end(); ) {
+    int DestinationRow = thisMove->getDestinationRow();
+    int DestinationCol = thisMove->getDestinationCol();
+    if ( (DestinationRow==DestinationCol) ||
+	 (DestinationRow+DestinationCol==3) ) {
+      DiagBigList.push_back(*thisMove);
+      BigList.erase(thisMove);
+      continue;
+    }
+    thisMove++;
+  }
+  for (vector<Move>::iterator thisMove = BigList.begin();
+       thisMove != BigList.end(); ) {
+    DiagBigList.push_back(*thisMove);
+    BigList.erase(thisMove);
+  }
+
+  // Highest priority.  Examine moves that gobble your own LAST
+  for (vector<Move>::iterator thisMove = DiagBigList.begin();
+       thisMove != DiagBigList.end(); ) {
+    int DestinationRow = thisMove->getDestinationRow();
+    int DestinationCol = thisMove->getDestinationCol();
+    Square thisSquare = thisBoard.getSquare(DestinationRow,DestinationCol);
+    if (thisSquare.top()*PlayerToMove <= 0) {
+      NoSelfDiagBigList.push_back(*thisMove);
+      DiagBigList.erase(thisMove);
+      continue;
+    }
+    thisMove++;
+  }
+  for (vector<Move>::iterator thisMove = DiagBigList.begin();
+       thisMove != DiagBigList.end(); ) {
+    NoSelfDiagBigList.push_back(*thisMove);
+    DiagBigList.erase(thisMove);
+  }
+
+  return NoSelfDiagBigList;
+}
+
 float Bot::alphaBeta(Board thisBoard, int depth, float alpha, float beta) {
   int PlayerToMove = thisBoard.getWhoseTurn();
   int Opponent     = PlayerToMove*-1;
@@ -475,8 +557,9 @@ float Bot::alphaBeta(Board thisBoard, int depth, float alpha, float beta) {
     return Evaluate(thisBoard);
   }
   vector<Move> LegalMoves = thisBoard.getAllLegalMoves(PlayerToMove);
-  ofstream empty;
-  vector<Move> OrderedMoves = ReorderMoves(LegalMoves,thisBoard, empty);
+  /* ofstream empty; */
+  /* vector<Move> OrderedMoves = ReorderMoves(LegalMoves,thisBoard, empty); */
+  vector<Move> OrderedMoves = ReorderMoves(LegalMoves,thisBoard);
   if (PlayerToMove > 0) {
     for (vector<Move>::iterator testMove = OrderedMoves.begin();
 	 testMove != OrderedMoves.end();

@@ -12,6 +12,7 @@ class Bot
 
   float Evaluate(Board thisBoard);
   std::vector<Move> ReorderMoves(std::vector<Move> ListOfMoves,Board thisBoard, ofstream& logfile);
+  std::vector<Move> ReorderMoves(std::vector<Move> ListOfMoves,Board thisBoard);
   float alphaBeta(Board thisBoard, int depth, float alpha, float beta);
  public:
   //constructors
