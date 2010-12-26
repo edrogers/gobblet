@@ -30,9 +30,9 @@ int main()
   } while ( !(myBoard.hasWon(1)) && !(myBoard.hasWon(-1)) );
   
   myBoard.print();
-  char* white = "\033[40;45m";
-  char* black = "\033[40;46m";
-  char* reset = "\033[m";
+  string white = "\033[40;45m";
+  string black = "\033[40;46m";
+  string reset = "\033[m";
 
   if (myBoard.hasWon(1)) {
     cout << white << "WHITE";

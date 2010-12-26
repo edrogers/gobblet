@@ -53,9 +53,9 @@ Move Bot::chooseMove(Board thisBoard){
   thisBoard.print();
   cout << endl;
 
-  char* white = "\033[40;45m";
-  char* black = "\033[40;46m";
-  char* reset = "\033[m";
+  string white = "\033[40;45m";
+  string black = "\033[40;46m";
+  string reset = "\033[m";
 
   if (playerNum > 0)
     cout << white << "WHITE";

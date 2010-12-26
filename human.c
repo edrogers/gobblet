@@ -47,9 +47,9 @@ Move Human::chooseMove(Board thisBoard){
   vector<Move> allLegal = thisBoard.getAllLegalMoves(whoseTurn);
   vector<Move>::iterator iter;
 
-  char* white = "\033[40;45m";
-  char* black = "\033[40;46m";
-  char* reset = "\033[m";
+  string white = "\033[40;45m";
+  string black = "\033[40;46m";
+  string reset = "\033[m";
 
   cout << "It is ";
   if (whoseTurn > 0)
