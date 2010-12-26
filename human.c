@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <iostream>
 #include "human.h"
 #include "move.h"
@@ -39,13 +40,16 @@ Move Human::chooseMove(Board thisBoard){
     return invalid;
   }
 
+  thisBoard.print();
+  cout << endl;
+
   Move userMove;
   vector<Move> allLegal = thisBoard.getAllLegalMoves(whoseTurn);
   vector<Move>::iterator iter;
 
-  const char* white = "\033[40;45m";
-  const char* black = "\033[40;46m";
-  const char* reset = "\033[m";
+  char* white = "\033[40;45m";
+  char* black = "\033[40;46m";
+  char* reset = "\033[m";
 
   cout << "It is ";
   if (whoseTurn > 0)
@@ -217,5 +221,6 @@ Move Human::chooseMove(Board thisBoard){
     cout << "Failed to input move";
   }
   */
+
   return userMove;
 }

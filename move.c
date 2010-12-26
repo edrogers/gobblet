@@ -1,7 +1,6 @@
 #include "move.h"
 #include <iostream>
 #include <string>
-using namespace std;
 
 bool Move::setOrigin(int row, int col)
 {
@@ -75,7 +74,7 @@ void Move::print()
     default: break;
     }
 
-  cout << orr << OriginCol+1 << "->" << dr << DestinationCol+1;
+  std::cout << orr << OriginCol+1 << "->" << dr << DestinationCol+1;
 
 }
 

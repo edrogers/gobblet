@@ -1,4 +1,4 @@
-#include <cmath>
+#include <math.h>
 #include <algorithm>
 #include <vector>
 #include <iostream>
@@ -29,7 +29,7 @@ Square::Square(int player)
 
 }
 
-string Square::print(int row)
+std::string Square::print(int row)
 {
   string output;
   string black = "\033[40;46m";
@@ -277,7 +277,7 @@ string Square::print(int row)
   return output;
 }
 
-vector<int> Square::getmyStack()
+std::vector<int> Square::getmyStack()
 {
   return myStack;
 }

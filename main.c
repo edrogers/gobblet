@@ -1,6 +1,10 @@
 #include <iostream>
 #include <vector>
+#include <cstdlib>
 #include "human.h"
+#include "alphaBot.h"
+#include "betaBot.h"
+#include "Bot.h"
 #include "move.h"
 #include "square.h"
 #include "board.h"
@@ -12,25 +16,23 @@ int main()
 {
   Board myBoard;
   Human playerA(1);
-  Human playerB(-1);
+  Bot playerB(-1);
 
   do {
-    myBoard.print();
-    cout << endl;
     Move nextMove;
 
     if(myBoard.getWhoseTurn() == 1)
       nextMove = playerA.chooseMove(myBoard);
-    else
+    else 
       nextMove = playerB.chooseMove(myBoard);
 
     myBoard.makeMove(nextMove, myBoard.getWhoseTurn());
   } while ( !(myBoard.hasWon(1)) && !(myBoard.hasWon(-1)) );
   
   myBoard.print();
-  const char* white = "\033[40;45m";
-  const char* black = "\033[40;46m";
-  const char* reset = "\033[m";
+  char* white = "\033[40;45m";
+  char* black = "\033[40;46m";
+  char* reset = "\033[m";
 
   if (myBoard.hasWon(1)) {
     cout << white << "WHITE";
