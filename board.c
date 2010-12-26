@@ -54,63 +54,6 @@ Board::Board()
 
 }
 
-bool Board::isPseudoLegal(Move thisMove, int player) {
-  vector<Move>::iterator iter;
-
-  /** First, check to see if the move could *ever* be legal **/
-  bool foundyet = false;
-  for(iter = allMoves.begin(); ( (iter != allMoves.end()) && (!(foundyet)) ); iter++) {
-    if((*iter) == thisMove)
-      foundyet = true;
-  }
-
-  if(!(foundyet)) return false;
-
-  int orr = thisMove.getOriginRow();
-  int oc = thisMove.getOriginCol();
-  int dr = thisMove.getDestinationRow();
-  int dc = thisMove.getDestinationCol();
-
-  Square origin = getSquare(orr, oc);
-  Square destination = getSquare(dr, dc);
-
-  /** Now check to see that the origin has one of player's shells on top **/
-  if(origin.top()*player <= 0) {
-    return false;
-    /** and check to see that it can gobble whatever is at destination **/
-  } else if (abs(origin.top()) <= abs(destination.top())) {
-    return false;
-  }
-
-  if (tryMove(thisMove, player)) {
-
-    /** Next, check to see that the move doesn't give away the game **/
-    if ( hasFourInARow((-1)*(player)) ) {
-      undoMove(thisMove, player);
-      return false;
-    }
-
-    undoMove(thisMove, player);
-  }
-
-  /* If it passes all those tests, it must be psuedo-legal */
-  return true;
- 
-}
-
-vector<Move> Board::getAllPseudoLegalMoves(int player) {
-  vector<Move> moves = allMoves;
-  vector<Move>::iterator iter;
-
-  for(iter = moves.end()-1; iter >= moves.begin(); iter--) {
-    if(!(isPseudoLegal(*iter, player))) {
-      moves.erase(iter);
-    }
-  }
-
-  return moves;
-}
-
 bool Board::hasFourInARow(int player) {
   if (player == 0) return false;
 
@@ -177,7 +120,7 @@ bool Board::tryMove(Move thisMove, int player) {
 
   int shellToMove = origin.top();
 
-  
+  // Can you drop this shell?   If not, stop right away
   if ( !((playBoard[dr][dc]).drop(shellToMove)) ) {
     return false;
   }
@@ -196,9 +139,6 @@ bool Board::tryMove(Move thisMove, int player) {
     }
   }
   
-
-  //  (playBoard[dr][dc]).drop(shellToMove);
-
   return true;
 
 }
@@ -288,7 +228,7 @@ int Board::getWhoseTurn() {
 
 void Board::print()
 {
-  bool displayMoves = false;
+  bool displayMoves = true;
 
   cout << endl;
   cout << "      ";
@@ -320,7 +260,9 @@ void Board::print()
   int numMoves = myMoves.size();
   int lineCount = 0;
   //  if (numMoves < 9) displayMoves = true;
-  displayMoves = true;
+  if (hasWon(-1*whoseTurn)) {
+    displayMoves = false;
+  }
   if (displayMoves) {
     cout << "All " << numMoves << " Legal Moves:";
   }
@@ -434,32 +376,14 @@ void Board::print()
   /*** everything before here is test-code ***/
 }
 
-bool Board::isInCheck(int player) {
-  int otherplayer = (-1)*player;
-  vector<Move>::iterator iter;
-  vector<Move> moves;
-  moves = getAllPseudoLegalMoves(otherplayer);
-
-  for(iter = moves.begin(); iter != moves.end(); iter++) {
-    if (tryMove(*iter, otherplayer)) {
-      if ( hasFourInARow(otherplayer) ) {
-	undoMove(*iter, otherplayer);
-	return true;
-      }
-      undoMove(*iter, otherplayer);
-    }
-  }
-
-  return false;
-}
-
 bool Board::isLegal(Move thisMove, int player) {
   vector<Move>::iterator iter;
 
   //  cout << "Checking Legality of " << thisMove.print() << endl;
 
 
-  /** First, check to see if the move could *ever* be legal **/
+  /** First, check to see if the move could *ever* be legal     **/
+  /** Excludes attempts to move back to origin and off of board **/
   bool foundyet = false;
   for(iter = allMoves.begin(); ( (iter != allMoves.end()) && (!(foundyet)) ); iter++) {
     if((*iter) == thisMove)
@@ -492,19 +416,6 @@ bool Board::isLegal(Move thisMove, int player) {
       return false;
     }
 
-    /** If that takes the game for player, it is legal **/
-    /** Note!  This is quite important for isInCheck() **/
-    if ( hasFourInARow(player) ) {
-      undoMove(thisMove, player);
-      return true;
-    }
-
-    /** Last, check that the move doesn't leave player in check **/ 
-    if ( isInCheck(player) ) {
-      undoMove(thisMove,player);
-      return false;
-    }
-
     undoMove(thisMove, player);
   }
   /* If it passes all those tests, it must be legal */
@@ -515,13 +426,13 @@ bool Board::isLegal(Move thisMove, int player) {
 vector<Move> Board::getAllLegalMoves(int player) {
   vector<Move> moves = allMoves;
   vector<Move>::iterator iter;
-
+  
   for(iter = moves.end()-1; iter >= moves.begin(); iter--) {
     if(!(isLegal(*iter, player))) {
       moves.erase(iter);
     }
   }
-
+  
   return moves;
 }
 
@@ -563,9 +474,6 @@ bool Board::hasWon(int player) {
 
   if(hasFourInARow(player))
     return true;
-
-  if( !(isInCheck(otherplayer)) )
-    return false;
 
   vector<Move> moves;
   moves = getAllLegalMoves(otherplayer);

@@ -16,7 +16,7 @@ int main()
 {
   Board myBoard;
   Human playerA(1);
-  Bot playerB(-1);
+  Bot   playerB(-1);
 
   do {
     Move nextMove;
