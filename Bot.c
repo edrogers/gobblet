@@ -40,7 +40,7 @@ Move Bot::chooseMove(Board thisBoard){
   /* ofstream logfile; */
   /* logfile.open("log.txt", ios_base::app); */
 
-  int depth = 1;
+  int depth = 2;
 
   int whoseTurn = thisBoard.getWhoseTurn();
   int opponent = (-1)*playerNum;
@@ -73,12 +73,12 @@ Move Bot::chooseMove(Board thisBoard){
 
   vector<Move> allLegal  = thisBoard.getAllLegalMoves(playerNum);
 
-  int nPiecesMoved = 0;
+  int nPiecesOpponentMoved = 0;
   for (int iStartSquare=0; iStartSquare!=3; iStartSquare++) {
-    Square thisStartSquare = thisBoard.getStartSquare(playerNum,iStartSquare);
-    nPiecesMoved += 4-abs(thisStartSquare.top());
+    Square thisStartSquare = thisBoard.getStartSquare(opponent,iStartSquare);
+    nPiecesOpponentMoved += 4-abs(thisStartSquare.top());
   }
-  if (nPiecesMoved <= 3) {
+  if (nPiecesOpponentMoved < 3) {
     for (vector<Move>::iterator thisMove = allLegal.begin();
 	 thisMove != allLegal.end(); ) {
       if (thisMove->isOriginInPlayBoard()) {
@@ -114,13 +114,24 @@ Move Bot::chooseMove(Board thisBoard){
        testMove++) {
     Board testBoard = thisBoard.testMove(*testMove,playerNum);
     float score = alphaBeta(testBoard, depth-1, alpha, beta);
-    if (score > alpha) {
-      alpha = score;
-      FavoriteMoveSoFar = *testMove;
-    }
-    if (score >= beta) {
-      FavoriteMoveSoFar = *testMove;
-      break;
+    if ( playerNum == 1 ) { // maximizing player 
+      if (score > alpha) {
+	alpha = score;
+	FavoriteMoveSoFar = *testMove;
+      }
+      if (alpha >= beta) {
+	FavoriteMoveSoFar = *testMove;
+	break;
+      }
+    } else { // minimizing player
+      if (score < beta) {
+	beta = score;
+	FavoriteMoveSoFar = *testMove;
+      }
+      if (alpha >= beta) {
+	FavoriteMoveSoFar = *testMove;
+	break;
+      }
     }
   }
 
@@ -257,234 +268,14 @@ float Bot::Evaluate(Board thisBoard) {
   return evaluation;
 }
 
-vector<Move> Bot::ReorderMoves(vector<Move> ListOfMoves, Board thisBoard, ofstream& logfile) {
-  int PlayerToMove = thisBoard.getWhoseTurn();
-
-/*   // Start of game, skip all this reordering */
-/*   int NMyPiecesOnBoard = 0; */
-/*   for (int iRow=0; iRow != 4; iRow++) { */
-/*     for (int iCol=0; iCol != 4; iCol++) { */
-/*       Square thisSquare = thisBoard.getSquare(iRow,iCol); */
-/*       if (thisSquare.top()*PlayerToMove > 0) */
-/* 	NMyPiecesOnBoard++; */
-/*     } */
-/*   } */
-/*   if (NMyPiecesOnBoard < 3)  */
-/*     return ListOfMoves; */
-
-
-/*   vector<Move> OrderedList; */
-
-  vector<Move> BigList;
-  vector<Move> DiagBigList;
-  vector<Move> NoSelfDiagBigList;
-
-  logfile << "      During reordering: ListOfMoves has " << ListOfMoves.size() << " legal moves." << endl;
-
-  // First (and least important) tweak, the bigger pieces the better
-  for (int pieceSize=4; pieceSize > 0; pieceSize--) {
-    for (vector<Move>::iterator thisMove = ListOfMoves.begin();
-	 thisMove != ListOfMoves.end(); ) {
-      int OriginRow = thisMove->getOriginRow();
-      int OriginCol = thisMove->getOriginCol();
-      Square thisSquare = thisBoard.getSquare(OriginRow,OriginCol);
-      if (abs(thisSquare.top()) == pieceSize) {
-	BigList.push_back(*thisMove);
-	ListOfMoves.erase(thisMove);
-	continue;
-      }
-      thisMove++;
-    }
-  }
-
-  logfile << "      During reordering: BigList has " << BigList.size() << " legal moves." << endl;
-
-  // Check moves to squares on diagonals before others
-  for (vector<Move>::iterator thisMove = BigList.begin();
-       thisMove != BigList.end(); ) {
-    int DestinationRow = thisMove->getDestinationRow();
-    int DestinationCol = thisMove->getDestinationCol();
-    if ( (DestinationRow==DestinationCol) ||
-	 (DestinationRow+DestinationCol==3) ) {
-      DiagBigList.push_back(*thisMove);
-      BigList.erase(thisMove);
-      continue;
-    }
-    thisMove++;
-  }
-  for (vector<Move>::iterator thisMove = BigList.begin();
-       thisMove != BigList.end(); ) {
-    DiagBigList.push_back(*thisMove);
-    BigList.erase(thisMove);
-  }
-
-  logfile << "      During reordering: DiagBigList has " << DiagBigList.size() << " legal moves." << endl;
-
-  // Highest priority.  Examine moves that gobble your own LAST
-  for (vector<Move>::iterator thisMove = DiagBigList.begin();
-       thisMove != DiagBigList.end(); ) {
-    int DestinationRow = thisMove->getDestinationRow();
-    int DestinationCol = thisMove->getDestinationCol();
-    Square thisSquare = thisBoard.getSquare(DestinationRow,DestinationCol);
-    if (thisSquare.top()*PlayerToMove <= 0) {
-      NoSelfDiagBigList.push_back(*thisMove);
-      DiagBigList.erase(thisMove);
-      continue;
-    }
-    thisMove++;
-  }
-  for (vector<Move>::iterator thisMove = DiagBigList.begin();
-       thisMove != DiagBigList.end(); ) {
-    NoSelfDiagBigList.push_back(*thisMove);
-    DiagBigList.erase(thisMove);
-  }
-
-  logfile << "      During reordering: NoSelfDiagBigList has " << NoSelfDiagBigList.size() << " legal moves." << endl;
-
-  return NoSelfDiagBigList;
-
-  // LATER TEST
-
-/*   vector<Move> ListOfMovesWithThreeInARows[21]; */
-/*   // Order by three-in-a-rows resulting */
-/*   for (vector<Move>::iterator thisMove = ListOfMoves.begin(); */
-/*        thisMove != ListOfMoves.end(); thisMove++) { */
-/*     int NThreeInARows = 0; */
-/*     // Compute the number of 3-in-a-rows for this move */
-/*     Board testBoard = thisBoard.testMove(*thisMove,thisBoard.getWhoseTurn()); */
-
-/*     // Check the rows */
-/*     for (int iRow=0; iRow != 4; iRow++) { */
-/*       int nMineInThisRow = 0; */
-/*       int nHisInThisRow = 0; */
-/*       for (int iCol=0; iCol != 4; iCol++) { */
-/* 	Square mySquare = testBoard.getSquare(iRow,iCol); */
-/* 	if (mySquare.top()*PlayerToMove > 0)  */
-/* 	  nMineInThisRow++; */
-/* 	if (mySquare.top()*PlayerToMove < 0) */
-/* 	  nHisInThisRow++; */
-/*       } */
-/*       if (nMineInThisRow == 3) { */
-/* 	NThreeInARows++; */
-/*       } */
-/*       if (nHisInThisRow == 3) { */
-/* 	NThreeInARows--; */
-/*       } */
-/*     } */
-
-/*     // Check the cols */
-/*     for (int iCol=0; iCol != 4; iCol++) { */
-/*       int nMineInThisCol = 0; */
-/*       int nHisInThisCol = 0; */
-/*       for (int iRow=0; iRow != 4; iRow++) { */
-/* 	Square mySquare = testBoard.getSquare(iRow,iCol); */
-/* 	if (mySquare.top()*PlayerToMove > 0) */
-/* 	  nMineInThisCol++; */
-/* 	if (mySquare.top()*PlayerToMove < 0) */
-/* 	  nMineInThisCol--; */
-/*       } */
-/*       if (nMineInThisCol == 3) { */
-/* 	NThreeInARows++; */
-/*       } */
-/*       if (nHisInThisCol == 3) { */
-/* 	NThreeInARows--; */
-/*       } */
-/*     } */
-
-/*     // Check the diagonals */
-/*     for (int iDiag=0; iDiag != 2; iDiag++) { */
-/*       int iRow, iCol; */
-/*       int nMineInThisDiag = 0; */
-/*       int nHisInThisDiag = 0; */
-/*       for (int iCounter=0; iCounter != 4; iCounter++) { */
-/* 	switch (iDiag)  */
-/* 	  { */
-/* 	  case 0 : iRow=iCounter; iCol=iCounter; break; */
-/* 	  case 1 : iRow=iCounter; iCol=4-iCounter; break; */
-/* 	  default : break; */
-/* 	  } */
-/* 	Square mySquare = thisBoard.getSquare(iRow,iCol); */
-/* 	if (mySquare.top()*PlayerToMove > 0)  */
-/* 	  nMineInThisDiag++; */
-/* 	if (mySquare.top()*PlayerToMove < 0) */
-/* 	  nHisInThisDiag++; */
-/*       } */
-/*       if (nMineInThisDiag == 3) { */
-/* 	NThreeInARows++; */
-/*       } */
-/*       if (nHisInThisDiag == 3) { */
-/* 	NThreeInARows--; */
-/*       } */
-/*     } */
-
-/*     (ListOfMovesWithThreeInARows[NThreeInARows+10]).push_back(*thisMove); */
-/*   } */
-/*   // Push-back contents of TriplesList onto OrderedList */
-/*   //  in a reverse way.  (Most Triples for me come first) */
-/*   for (int vectNum=20; vectNum>=0; vectNum--) { */
-/*     for (vector<Move>::iterator thisMove = (ListOfMovesWithThreeInARows[vectNum]).begin(); */
-/* 	 thisMove != (ListOfMovesWithThreeInARows[vectNum]).end(); */
-/* 	 thisMove++) { */
-/*       OrderedList.push_back(*thisMove); */
-/*     } */
-/*   } */
-  
-
-  //  EARLY TEST
-
-
-
-/*   // Check things in the start squares first */
-/*   for (vector<Move>::iterator thisMove = ListOfMoves.begin(); */
-/*        thisMove != ListOfMoves.end(); ) { */
-/*     if (!(thisMove->isOriginInPlayBoard())) { */
-/*       OrderedList.push_back(*thisMove); */
-/*       ListOfMoves.erase(thisMove); */
-/*       continue; */
-/*     } */
-/*     thisMove++; */
-/*   } */
-
-/*   // Then go in decreasing order of gobblet size. */
-/*   for (int gobbletSize=4; gobbletSize>=0; gobbletSize--) { */
-/*     for (vector<Move>::iterator thisMove = ListOfMoves.begin(); */
-/* 	 thisMove != ListOfMoves.end(); ) { */
-/*       int row = thisMove->getOriginRow(); */
-/*       int col = thisMove->getOriginCol(); */
-/*       Square thisSquare = thisBoard.getSquare(row,col); */
-/*       if (abs(thisSquare.top()) == gobbletSize) { */
-/* 	OrderedList.push_back(*thisMove); */
-/* 	ListOfMoves.erase(thisMove); */
-/* 	continue; */
-/*       } */
-/*       thisMove++; */
-/*     } */
-/*   } */
-
-/*   return OrderedList; */
-}
-
 vector<Move> Bot::ReorderMoves(vector<Move> ListOfMoves, Board thisBoard) {
   int PlayerToMove = thisBoard.getWhoseTurn();
-
-/*   // Start of game, skip all this reordering */
-/*   int NMyPiecesOnBoard = 0; */
-/*   for (int iRow=0; iRow != 4; iRow++) { */
-/*     for (int iCol=0; iCol != 4; iCol++) { */
-/*       Square thisSquare = thisBoard.getSquare(iRow,iCol); */
-/*       if (thisSquare.top()*PlayerToMove > 0) */
-/* 	NMyPiecesOnBoard++; */
-/*     } */
-/*   } */
-/*   if (NMyPiecesOnBoard < 3)  */
-/*     return ListOfMoves; */
-
-
-/*   vector<Move> OrderedList; */
+  int opponent = -1*PlayerToMove;
 
   vector<Move> BigList;
   vector<Move> DiagBigList;
   vector<Move> NoSelfDiagBigList;
+  vector<Move> BlockThreeNoSelfDiagBigList;
 
   // First (and least important) tweak, the bigger pieces the better
   for (int pieceSize=4; pieceSize > 0; pieceSize--) {
@@ -540,7 +331,76 @@ vector<Move> Bot::ReorderMoves(vector<Move> ListOfMoves, Board thisBoard) {
     DiagBigList.erase(thisMove);
   }
 
-  return NoSelfDiagBigList;
+  // REALLY Highest priority.  Examine moves that put pieces in the way of a 3-in-a-row attack
+  for (vector<Move>::iterator thisMove = NoSelfDiagBigList.begin();
+       thisMove != NoSelfDiagBigList.end(); ) {
+    // check the row
+    int iRow = thisMove->getDestinationRow();
+    int nHisInThisRow = 0;
+    for (int iCol=0; iCol != 4; iCol++) {
+      Square mySquare = thisBoard.getSquare(iRow,iCol);
+      if (mySquare.top()*opponent > 0)
+	nHisInThisRow++;
+    }
+    if (nHisInThisRow == 3) {
+      BlockThreeNoSelfDiagBigList.push_back(*thisMove);
+      NoSelfDiagBigList.erase(thisMove);
+      continue;
+    }
+    
+    // check the col
+    int iCol = thisMove->getDestinationCol();
+    int nHisInThisCol = 0;
+    for (int iRow=0; iRow != 4; iRow++) {
+      Square mySquare = thisBoard.getSquare(iRow,iCol);
+      if (mySquare.top()*opponent > 0)
+	nHisInThisCol++;
+    }
+    if (nHisInThisCol == 3) {
+      BlockThreeNoSelfDiagBigList.push_back(*thisMove);
+      NoSelfDiagBigList.erase(thisMove);
+      continue;
+    }
+    
+    // if on diag, check that too
+    iRow = thisMove->getDestinationRow();
+    iCol = thisMove->getDestinationCol();
+    if (iRow==iCol) {
+      int nHisInThisDiag = 0;
+      for (int iRow=0; iRow != 4; iRow++) {
+	iCol=iRow;
+	Square mySquare = thisBoard.getSquare(iRow,iCol);
+	if (mySquare.top()*opponent > 0)
+	  nHisInThisDiag++;
+      }
+      if (nHisInThisDiag == 3) {
+	BlockThreeNoSelfDiagBigList.push_back(*thisMove);
+	NoSelfDiagBigList.erase(thisMove);
+	continue;
+      }	
+    } else if (iRow+iCol == 3) {
+      int nHisInThisDiag = 0;
+      for (int iRow=0; iRow != 4; iRow++) {
+	iCol=3-iRow;
+	Square mySquare = thisBoard.getSquare(iRow,iCol);
+	if (mySquare.top()*opponent > 0)
+	  nHisInThisDiag++;
+      }
+      if (nHisInThisDiag == 3) {
+	BlockThreeNoSelfDiagBigList.push_back(*thisMove);
+	NoSelfDiagBigList.erase(thisMove);
+	continue;
+      }	
+    }
+    thisMove++;
+  }
+  for (vector<Move>::iterator thisMove = NoSelfDiagBigList.begin();
+       thisMove != NoSelfDiagBigList.end(); ) {
+    BlockThreeNoSelfDiagBigList.push_back(*thisMove);
+    NoSelfDiagBigList.erase(thisMove);
+  }
+
+  return BlockThreeNoSelfDiagBigList;
 }
 
 float Bot::alphaBeta(Board thisBoard, int depth, float alpha, float beta) {
@@ -554,7 +414,7 @@ float Bot::alphaBeta(Board thisBoard, int depth, float alpha, float beta) {
     return Opponent*999999.9;
   }
   if (depth <= 0) {
-    return Evaluate(thisBoard);
+    return PlayerToMove*Evaluate(thisBoard);
   }
   vector<Move> LegalMoves = thisBoard.getAllLegalMoves(PlayerToMove);
   /* ofstream empty; */
