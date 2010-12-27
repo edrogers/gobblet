@@ -472,6 +472,9 @@ Board Board::testMove(Move thisMove, int player) {
 bool Board::hasWon(int player) {
   int otherplayer = (-1)*player;
 
+  if(hasFourInARow(otherplayer))
+    return false;
+
   if(hasFourInARow(player))
     return true;
 
