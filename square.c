@@ -29,6 +29,24 @@ Square::Square(int player)
 
 }
 
+Square::Square(string php_code)
+{
+  int php_code_word = atoi(php_code.c_str());
+  int php_word[4] = { 0 };
+  for(int php_code_letter = 0; 
+      php_code_letter != 4; 
+      php_code_letter++) {
+    php_word[php_code_letter] = (int) (php_code_word/(pow(3.0,php_code_letter*1.0)))%3;
+  }
+
+  for(int i=1; i<5; ++i)
+    {
+      if ((php_word[i-1]-1) != 0) {
+	myStack.push_back((php_word[i-1]-1)*i);
+      }
+    }
+}
+
 std::string Square::print(int row)
 {
   string output;
@@ -275,6 +293,25 @@ std::string Square::print(int row)
     }
   }
   return output;
+}
+
+void Square::php_print() {
+  cout << " " << getStackPhpCode();
+}
+
+int Square::getStackPhpCode()
+{
+  int code = 40;
+  for (vector<int>::iterator it = myStack.begin();
+       it != myStack.end();
+       it++) {
+    if((*it) > 0) {
+      code+=pow(3.0,1.0*(abs((*it)-1)));
+    } else {
+      code-=pow(3.0,1.0*(abs(*it)-1));
+    }
+  }
+  return code;
 }
 
 std::vector<int> Square::getmyStack()
