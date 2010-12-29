@@ -13,7 +13,10 @@ class Square
  public:
   Square();
   Square(int player);
+  Square(std::string php_code);
   std::string print(int row);
+  void php_print();
+  int getStackPhpCode();
   std::vector<int> getmyStack();
   bool lift(int player);
   bool drop(int shell);
