@@ -1,6 +1,45 @@
 #include "move.h"
 #include <iostream>
+#include <algorithm>
+#include <math.h>
 #include <string>
+
+Move::Move() 
+{
+  OriginRow = 0;
+  OriginCol = 0;
+  DestinationRow = 0;
+  DestinationCol = 0;
+}
+
+Move::Move(std::string moveOrig, std::string moveDest)
+{
+  int orig_num = atoi(moveOrig.c_str());
+  int dest_num = atoi(moveDest.c_str());
+  int origRow, origCol, destRow, destCol;
+  if (orig_num < 16) {
+    origRow = orig_num/4;
+    origCol = orig_num%4;
+  } else if (orig_num < 19) {
+    origRow = 4;
+    origCol = orig_num-16;
+  } else if (orig_num < 22) {
+    origRow = 5;
+    origCol = orig_num-19;
+  }
+  if (dest_num < 16) {
+    destRow = dest_num/4;
+    destCol = dest_num%4;
+  } else if (dest_num < 19) {
+    destRow = 4;
+    destCol = dest_num-16;
+  } else if (dest_num < 22) {
+    destRow = 5;
+    destCol = dest_num-19;
+  }
+  setOrigin(origRow,origCol);
+  setDestination(destRow,destCol);
+}
 
 bool Move::setOrigin(int row, int col)
 {
