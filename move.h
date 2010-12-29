@@ -13,6 +13,8 @@ class Move
   int DestinationRow; 
   int DestinationCol;
  public:
+  Move();
+  Move(std::string moveOrig, std::string moveDest);
   bool setOrigin(int row, int col);
   bool setDestination(int row, int col);
   int getOriginRow();
