@@ -21,6 +21,7 @@ class Board
   Square blackStart[3];         // Black's starting stacks
   int whoseTurn;
   vector<Move> allMoves; // all origin-destination combos
+  void buildAllMoves();
 
   //member-functions
   bool hasFourInARow(int player);
@@ -30,6 +31,10 @@ class Board
  public:
   //default constructor
   Board();
+  //php-ready constructor
+  Board(std::string boardSquareState[4][4],
+	std::string whiteStartSquareState[3],
+	std::string blackStartSquareState[3]);
 
   //member accessors
   Square getSquare(int row, int col);
@@ -39,6 +44,7 @@ class Board
 
   //member functions
   void print();
+  void php_print();
   bool isLegal(Move thisMove, int player); //can player make Move
   vector<Move> getAllLegalMoves(int player);
   bool makeMove(Move thisMove, int player);

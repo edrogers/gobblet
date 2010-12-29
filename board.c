@@ -27,7 +27,31 @@ Board::Board()
     whiteStart[i] = WhiteSquare;
     blackStart[i] = BlackSquare;
   }
+  buildAllMoves();
 
+  whoseTurn = 1;
+
+}
+
+Board::Board(string boardSquareState[4][4], string whiteStartSquareState[3], string blackStartSquareState[3])
+{
+  for(int i=0; i != ROWS; ++i) {
+    for(int j=0; j != COLS; ++j) {
+      playBoard[i][j] = Square(boardSquareState[i][j]);
+    }
+  }
+  for(int i=0; i != 3; ++i) {
+    whiteStart[i] = Square(whiteStartSquareState[i]);
+    blackStart[i] = Square(blackStartSquareState[i]);
+  }
+  buildAllMoves();
+
+  whoseTurn = 1;
+}
+
+void Board::buildAllMoves()
+{
+  allMoves.clear();
   Move thisMove;
   for(int i=0; i!=ROWS; ++i) {
     for(int j=0; j!=COLS; ++j) {
@@ -49,9 +73,7 @@ Board::Board()
       }
     }
   }
-
-  whoseTurn = 1;
-
+  return;
 }
 
 bool Board::hasFourInARow(int player) {
@@ -374,6 +396,23 @@ void Board::print()
   /*** everything after here is test-code ***/
   
   /*** everything before here is test-code ***/
+}
+
+void Board::php_print()
+{
+  for (int j=0; j!=3; ++j) {
+    whiteStart[j].php_print();
+  }
+  for (int h=0; h!=ROWS; ++h) {
+    for(int j=0; j!=COLS; ++j) {
+      playBoard[h][j].php_print();
+    }
+  }
+  for (int j=0; j!=3; ++j) {
+    blackStart[j].php_print();
+  }
+  cout << endl;
+  return;
 }
 
 bool Board::isLegal(Move thisMove, int player) {
