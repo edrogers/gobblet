@@ -3,6 +3,7 @@
 #include <vector>
 #include <iostream>
 #include "square.h"
+#include <stdio.h>
 using namespace std;
 
 Square::Square()
@@ -295,8 +296,40 @@ std::string Square::print(int row)
   return output;
 }
 
-void Square::php_print() {
-  cout << " " << getStackPhpCode();
+void Square::php_print(int squareNum,int movePart) {
+  cout << "<input type=\"hidden\" name=\"" << locationNumToString(squareNum) << "\" ";
+  cout << "value=\"" << getStackPhpCode() << "\">";
+  cout << "<button type=\"submit\" name=\"m" << movePart << "\" value=\"" << squareNum << "\">";
+  cout << "<img src=\"gobblet_img/";
+  if (myStack.size() == 0) {
+    cout << "empty";
+  } else {
+    if (top() > 0) {
+      cout << "w";
+    } else if (top() < 0) {
+      cout << "b";
+    }
+    cout << abs(top());
+  }
+  cout << ".gif\" border=\"0\" /></button>";
+}
+
+void Square::php_print_selected(int squareNum,int movePart) {
+  cout << "<input type=\"hidden\" name=\"" << locationNumToString(squareNum) << "\" ";
+  cout << "value=\"" << getStackPhpCode() << "\">";
+  cout << "<button type=\"submit\" name=\"m" << movePart << "\" value=\"" << squareNum << "\">";
+  cout << "<img src=\"gobblet_img/";
+  if (myStack.size() == 0) {
+    cout << "empty";
+  } else {
+    if (top() > 0) {
+      cout << "w";
+    } else if (top() < 0) {
+      cout << "b";
+    }
+    cout << abs(top()) << "select";
+  }
+  cout << ".gif\" border=\"0\" /></button>";
 }
 
 int Square::getStackPhpCode()
@@ -312,6 +345,19 @@ int Square::getStackPhpCode()
     }
   }
   return code;
+}
+
+string Square::locationNumToString(int squareLocation) {
+  char squareLocationString[4] = "";;
+  if (squareLocation < 16) {
+    sprintf(squareLocationString,"s%d", squareLocation);
+  } else if (squareLocation < 19) {
+    sprintf(squareLocationString,"w%d", squareLocation-16);
+  } else {
+    sprintf(squareLocationString,"b%d", squareLocation-19);
+  }
+  string locationString(squareLocationString);
+  return locationString;
 }
 
 std::vector<int> Square::getmyStack()

@@ -15,8 +15,10 @@ class Square
   Square(int player);
   Square(std::string php_code);
   std::string print(int row);
-  void php_print();
+  void php_print(int squareNum,int movePart);
+  void php_print_selected(int squareNum,int movePart);
   int getStackPhpCode();
+  std::string locationNumToString(int squareLocation);
   std::vector<int> getmyStack();
   bool lift(int player);
   bool drop(int shell);
