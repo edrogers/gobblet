@@ -10,6 +10,12 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
+  if (argc == 1) {
+    Board cleanBoard;
+    cleanBoard.php_print();
+    return 0;
+  }
+
   string boardSquareState[4][4];
   string whiteStartSquareState[3];
   string blackStartSquareState[3];
@@ -29,21 +35,32 @@ int main(int argc, char* argv[])
     }
   }
   string moveOrig(argv[23]);
-  string moveDest(argv[24]);
+  string moveDest;
+  if (argc > 24) 
+    moveDest = string(argv[24]);
 
   Board myBoard(boardSquareState, whiteStartSquareState, blackStartSquareState);
-  Move thisMove(moveOrig,moveDest);
+  if (argc == 24) { 
+    myBoard.php_print_selected(moveOrig);
+  } else if (argc == 25) {
+    Move thisMove(moveOrig,moveDest);
 
-  bool madeMove = false;
-  madeMove = myBoard.makeMove(thisMove, myBoard.getWhoseTurn());
-
-  if (madeMove) {
-    PhpBot playerB(-1);
-    Move nextMove = playerB.chooseMove(myBoard);
-    myBoard.makeMove(nextMove, myBoard.getWhoseTurn());
-  }  
-
-  myBoard.php_print();
+    bool madeMove = false;
+    madeMove = myBoard.makeMove(thisMove, myBoard.getWhoseTurn());
+    
+    if (madeMove) {
+      if (myBoard.hasWon(1)) {
+	myBoard.php_print();
+	return 0;
+      } else {
+	PhpBot playerB(-1);
+	Move nextMove = playerB.chooseMove(myBoard);
+	myBoard.makeMove(nextMove, myBoard.getWhoseTurn());
+      }
+    }  
+    
+    myBoard.php_print();
+  }
 
   return 0;
 }
