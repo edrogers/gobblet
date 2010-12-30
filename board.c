@@ -400,18 +400,70 @@ void Board::print()
 
 void Board::php_print()
 {
+  cout << "<form action=\"index.php\" method=\"post\">";
+  cout << "<input type=\"hidden\" name=\"m1\" value=\"\">";
+
+  cout << "<img src=\"gobblet_img/buffer.gif\">";
   for (int j=0; j!=3; ++j) {
-    whiteStart[j].php_print();
+    whiteStart[j].php_print(16+j,0);
   }
-  for (int h=0; h!=ROWS; ++h) {
+  cout << "<img src=\"gobblet_img/buffer.gif\"><br />";
+
+  for(int h=0; h!=ROWS; ++h) {
     for(int j=0; j!=COLS; ++j) {
-      playBoard[h][j].php_print();
+      playBoard[h][j].php_print(h*COLS+j,0);
+    }
+    cout << "<br />";
+  }
+
+  cout << "<img src=\"gobblet_img/buffer.gif\">";
+  for (int j=0; j!=3; ++j) {
+    blackStart[j].php_print(19+j,0);
+  }
+  cout << "<img src=\"gobblet_img/buffer.gif\"><br />";
+  cout << "</form>" << endl;
+  
+  return;
+}
+
+void Board::php_print_selected(string moveOrig)
+{
+  cout << "<form action=\"index.php\" method=\"post\">";
+  cout << "<input type=\"hidden\" name=\"m0\" value=\"" << moveOrig << "\">";
+
+  int selectedSquare = atoi(moveOrig.c_str());
+  cout << "<img src=\"gobblet_img/buffer.gif\">";
+  for (int j=0; j!=3; ++j) {
+    if (j+COLS*ROWS == selectedSquare) {
+      whiteStart[j].php_print_selected(j+COLS*ROWS,1);
+    } else {
+      whiteStart[j].php_print(j+COLS*ROWS,1);
     }
   }
-  for (int j=0; j!=3; ++j) {
-    blackStart[j].php_print();
+  cout << "<img src=\"gobblet_img/buffer.gif\"><br />";
+
+  for(int h=0; h!=ROWS; ++h) {
+    for(int j=0; j!=COLS; ++j) {
+      if (h*COLS+j == selectedSquare) {
+	playBoard[h][j].php_print_selected(h*COLS+j,1);
+      } else {
+	playBoard[h][j].php_print(h*COLS+j,1);
+      }
+    }
+    cout << "<br />";
   }
-  cout << endl;
+
+  cout << "<img src=\"gobblet_img/buffer.gif\">";
+  for (int j=0; j!=3; ++j) {
+    if (j+COLS*ROWS+3 == selectedSquare) {
+      blackStart[j].php_print_selected(j+COLS*ROWS+3,1);
+    } else { 
+      blackStart[j].php_print(j+COLS*ROWS+3,1);
+    }
+  }
+  cout << "<img src=\"gobblet_img/buffer.gif\"><br />";
+  cout << "</form>" << endl;
+
   return;
 }
 

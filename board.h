@@ -45,6 +45,7 @@ class Board
   //member functions
   void print();
   void php_print();
+  void php_print_selected(string moveOrig);
   bool isLegal(Move thisMove, int player); //can player make Move
   vector<Move> getAllLegalMoves(int player);
   bool makeMove(Move thisMove, int player);
