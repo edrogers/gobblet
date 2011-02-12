@@ -33,20 +33,23 @@ Board::Board()
 
 }
 
-Board::Board(string boardSquareState[4][4], string whiteStartSquareState[3], string blackStartSquareState[3])
+Board::Board(Square WhiteStartSquares[3],
+	     Square BlackStartSquares[3],
+	     Square PlayBoardSquares[4][4],
+	     int WhoseTurn)
 {
   for(int i=0; i != ROWS; ++i) {
     for(int j=0; j != COLS; ++j) {
-      playBoard[i][j] = Square(boardSquareState[i][j]);
+      playBoard[i][j] = PlayBoardSquares[i][j];
     }
   }
   for(int i=0; i != 3; ++i) {
-    whiteStart[i] = Square(whiteStartSquareState[i]);
-    blackStart[i] = Square(blackStartSquareState[i]);
+    whiteStart[i] = WhiteStartSquares[i];
+    blackStart[i] = BlackStartSquares[i];
   }
   buildAllMoves();
 
-  whoseTurn = 1;
+  whoseTurn = WhoseTurn;
 }
 
 void Board::buildAllMoves()

@@ -31,10 +31,14 @@ class Board
  public:
   //default constructor
   Board();
-  //php-ready constructor
-  Board(std::string boardSquareState[4][4],
-	std::string whiteStartSquareState[3],
-	std::string blackStartSquareState[3]);
+  /* //php-ready constructor */
+  /* Board(std::string boardSquareState[4][4], */
+  /* 	std::string whiteStartSquareState[3], */
+  /* 	std::string blackStartSquareState[3]); */
+  Board(Square WhiteStartSquares[3],
+	Square BlackStartSquares[3],
+	Square PlayBoardSquares[ROWS][COLS],
+	int WhoseTurn);
 
   //member accessors
   Square getSquare(int row, int col);
