@@ -30,22 +30,16 @@ Square::Square(int player)
 
 }
 
-Square::Square(string php_code)
+Square::Square(string SquareWord)
 {
-  int php_code_word = atoi(php_code.c_str());
-  int php_word[4] = { 0 };
-  for(int php_code_letter = 0; 
-      php_code_letter != 4; 
-      php_code_letter++) {
-    php_word[php_code_letter] = (int) (php_code_word/(pow(3.0,php_code_letter*1.0)))%3;
-  }
-
-  for(int i=1; i<5; ++i)
-    {
-      if ((php_word[i-1]-1) != 0) {
-	myStack.push_back((php_word[i-1]-1)*i);
-      }
+  for (int i=0; i!=4; i++) {
+    char Letter = SquareWord.at(i);
+    if (Letter == 'W') {
+      myStack.push_back(i+1);
+    } else if (Letter == 'B') {
+      myStack.push_back(-1*(i+1));
     }
+  }
 }
 
 std::string Square::print(int row)
@@ -402,6 +396,14 @@ int Square::top()
 {
   if(myStack.size() > 0) 
     return myStack.back();
+  else
+    return 0;
+}
+
+int Square::second_from_top()
+{
+  if(myStack.size() > 1) 
+    return myStack[myStack.size()-2];
   else
     return 0;
 }

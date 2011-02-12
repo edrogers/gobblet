@@ -13,7 +13,7 @@ class Square
  public:
   Square();
   Square(int player);
-  Square(std::string php_code);
+  Square(std::string SquareWord);
   std::string print(int row);
   void php_print(int squareNum,int movePart);
   void php_print_selected(int squareNum,int movePart);
@@ -23,6 +23,7 @@ class Square
   bool lift(int player);
   bool drop(int shell);
   int top(); //return just the top shell
+  int second_from_top(); //return what's below the top shell
 };
 
 #endif
