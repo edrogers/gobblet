@@ -40,7 +40,7 @@ Move Bot::chooseMove(Board thisBoard){
   /* ofstream logfile; */
   /* logfile.open("log.txt", ios_base::app); */
 
-  int depth = 2;
+  int depth = 3;
 
   int whoseTurn = thisBoard.getWhoseTurn();
   int opponent = (-1)*playerNum;
