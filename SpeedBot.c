@@ -40,7 +40,7 @@ Move SpeedBot::chooseMove(Board thisBoard){
   /* ofstream logfile; */
   /* logfile.open("log.txt", ios_base::app); */
 
-  int depth = 2;
+  int depth = 1;
 
   int whoseTurn = thisBoard.getWhoseTurn();
   int opponent = (-1)*playerNum;
@@ -312,11 +312,11 @@ int SpeedBot::nOtherPiecesThisColAfterPlayerMoves(Board thisBoard, Move thisMove
   for (int iRow=0; iRow != 4; iRow++) {
     if (iRow != thisMove.getDestinationRow()) {
       if (!((iRow == thisMove.getOriginRow()) && (iCol == thisMove.getOriginCol()))) {
-	Square mySquare = thisBoard.getSquare(iCol,iRow);
+	Square mySquare = thisBoard.getSquare(iRow,iCol);
 	if (mySquare.top()*PlayerToMove > 0)
 	  nMyOtherPiecesInThisColAfterMove++;
       } else {
-	Square mySquare = thisBoard.getSquare(iCol,iRow);
+	Square mySquare = thisBoard.getSquare(iRow,iCol);
 	if (mySquare.second_from_top()*PlayerToMove > 0)
 	  nMyOtherPiecesInThisColAfterMove++;
       }
@@ -398,7 +398,7 @@ int SpeedBot::nOpponentBigPiecesThisColAfterPlayerMoves(Board thisBoard, Move th
   int iCol = thisMove.getDestinationCol();
   int nOpponentBigPiecesInThisColAfterMove = 0;
   for (int iRow=0; iRow != 4; iRow++) {
-    Square mySquare = thisBoard.getSquare(iCol,iRow);
+    Square mySquare = thisBoard.getSquare(iRow,iCol);
     if (mySquare.top()*opponent == 4)
       nOpponentBigPiecesInThisColAfterMove++;
   }
@@ -416,7 +416,7 @@ int SpeedBot::nOpponentBigPiecesThisDiagAfterPlayerMoves(Board thisBoard, Move t
     for (int iRow=0; iRow != 4; iRow++) {
       if (iRow != thisMove.getDestinationRow()) {
 	iCol=iRow;
-	Square mySquare = thisBoard.getSquare(iCol,iRow);
+	Square mySquare = thisBoard.getSquare(iRow,iCol);
 	if (mySquare.top()*opponent == 4)
 	  nOpponentBigPiecesThisDiagAfterPlayerMoves++;
       }
@@ -425,7 +425,7 @@ int SpeedBot::nOpponentBigPiecesThisDiagAfterPlayerMoves(Board thisBoard, Move t
     for (int iRow=0; iRow != 4; iRow++) {
       if (iRow != thisMove.getDestinationRow()) {
 	iCol=3-iRow;
-	Square mySquare = thisBoard.getSquare(iCol,iRow);
+	Square mySquare = thisBoard.getSquare(iRow,iCol);
 	if (mySquare.top()*opponent == 4)
 	  nOpponentBigPiecesThisDiagAfterPlayerMoves++;
       }
@@ -445,12 +445,12 @@ vector<Move> SpeedBot::ReorderMoves(vector<Move> ListOfMoves, Board thisBoard) {
   vector<Move> UnobstructedThreeInARow;			 
   vector<Move> DoubleUnobstructedThreeInARow;		 
   vector<Move> BigManLinksDoubleUnobstructedThreeInARow; 
-  vector<Move> NoneOfTheAbove;
+  vector<Move> NoneOfTheAbove;                           
   vector<Move> CompleteListReordered;
 
   // Loop through every move:
   for (vector<Move>::iterator thisMove = ListOfMoves.begin();
-	 thisMove != ListOfMoves.end(); ) {
+       thisMove != ListOfMoves.end(); ) {
 
     bool isAtLeastThreeInARow                              = false;                             
     bool isAtLeastUnobstructedThreeInARow                  = false;                 
@@ -461,7 +461,7 @@ vector<Move> SpeedBot::ReorderMoves(vector<Move> ListOfMoves, Board thisBoard) {
     bool isAtLeastBigManLinksDoubleUnobstructedThreeInARow = false;
 
     // check the row
-    if (nOtherPiecesThisRowAfterPlayerMoves(thisBoard, *thisMove) > 2) {
+    if (nOtherPiecesThisRowAfterPlayerMoves(thisBoard, *thisMove) > 1) {
       isAtLeastThreeInARow |= true;
       // Is it unobstructed?
       UnobstructedInRow = (nOpponentBigPiecesThisRowAfterPlayerMoves(thisBoard, *thisMove) == 0);
@@ -470,7 +470,7 @@ vector<Move> SpeedBot::ReorderMoves(vector<Move> ListOfMoves, Board thisBoard) {
       }
     }
     // check the col
-    if (nOtherPiecesThisColAfterPlayerMoves(thisBoard, *thisMove) > 2) {
+    if (nOtherPiecesThisColAfterPlayerMoves(thisBoard, *thisMove) > 1) {
       isAtLeastThreeInARow |= true;
       // Is it unobstructed?
       UnobstructedInCol = (nOpponentBigPiecesThisColAfterPlayerMoves(thisBoard, *thisMove) == 0);
@@ -479,7 +479,7 @@ vector<Move> SpeedBot::ReorderMoves(vector<Move> ListOfMoves, Board thisBoard) {
       }
     }
     // check the diag
-    if (nOtherPiecesThisDiagAfterPlayerMoves(thisBoard, *thisMove) > 2) {
+    if (nOtherPiecesThisDiagAfterPlayerMoves(thisBoard, *thisMove) > 1) {
       isAtLeastThreeInARow |= true;
       // Is it unobstructed?
       UnobstructedInDiag = (nOpponentBigPiecesThisDiagAfterPlayerMoves(thisBoard, *thisMove) == 0);
@@ -495,7 +495,7 @@ vector<Move> SpeedBot::ReorderMoves(vector<Move> ListOfMoves, Board thisBoard) {
     if (nTimesUnobstructedThreeInARow > 1) {
       isAtLeastDoubleUnobstructedThreeInARow = true;
     }
-    
+
     Square mySquare = thisBoard.getSquare(thisMove->getOriginRow(), thisMove->getOriginCol());
     int sizeOfMovedPiece = mySquare.top()*PlayerToMove;
 
