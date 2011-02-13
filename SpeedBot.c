@@ -40,7 +40,7 @@ Move SpeedBot::chooseMove(Board thisBoard){
   /* ofstream logfile; */
   /* logfile.open("log.txt", ios_base::app); */
 
-  int depth = 3;
+  int depth = 2;
 
   int whoseTurn = thisBoard.getWhoseTurn();
   int opponent = (-1)*playerNum;
@@ -106,7 +106,13 @@ Move SpeedBot::chooseMove(Board thisBoard){
   vector<Move> OrderedMoves = ReorderMoves(allLegal,thisBoard);
   /* vector<Move> OrderedMoves = allLegal; */
 
-  Move FavoriteMoveSoFar = OrderedMoves[0]; // Just start with whatever
+  /* Move  FavoriteMoveSoFar = OrderedMoves[0]; // Just start with whatever */
+  Move* FavoriteMoveSoFar = NULL;
+  float FavoriteMoveSoFarScore = 0.0;
+
+  Move* WinningMove = new Move();
+  WinningMove->setOrigin(3,3);
+  WinningMove->setDestination(2,0);
   
   float alpha = -999999.9;
   float beta  =  999999.9;
@@ -114,35 +120,39 @@ Move SpeedBot::chooseMove(Board thisBoard){
        testMove != OrderedMoves.end();
        testMove++) {
     Board testBoard = thisBoard.testMove(*testMove,playerNum);
-    float score = alphaBeta(testBoard, depth-1, alpha, beta);
-    if ( playerNum == 1 ) { // maximizing player 
-      if (score > alpha) {
-	alpha = score;
-	FavoriteMoveSoFar = *testMove;
-      }
-      if (alpha >= beta) {
-	FavoriteMoveSoFar = *testMove;
-	break;
-      }
-    } else { // minimizing player
-      if (score < beta) {
-	beta = score;
-	FavoriteMoveSoFar = *testMove;
-      }
-      if (alpha >= beta) {
-	FavoriteMoveSoFar = *testMove;
-	break;
-      }
+    float score = alphaBeta(testBoard, depth, alpha, beta);
+
+    if ((*testMove) == (*WinningMove)) {
+      cout << "  Winning Move Score: " << score << "  ";
+      testMove->print();
+      cout << endl;
+    }
+
+    if (FavoriteMoveSoFar == NULL) {
+      FavoriteMoveSoFar = &(*testMove);
+      FavoriteMoveSoFarScore = score;
+      continue;
+    }     
+
+    if (score*playerNum > FavoriteMoveSoFarScore*playerNum) {
+      FavoriteMoveSoFar = &(*testMove);
+      FavoriteMoveSoFarScore = score;
     }
   }
 
   /* logfile << (FavoriteMoveSoFar).getOriginRow() << "," << (FavoriteMoveSoFar).getOriginCol() << " -> "; */
   /* logfile << (FavoriteMoveSoFar).getDestinationRow() << "," << (FavoriteMoveSoFar).getDestinationCol() << endl; */
-  FavoriteMoveSoFar.print();
+  if (FavoriteMoveSoFar) 
+    FavoriteMoveSoFar->print();
+  cout << endl;
+
+
+  cout << "  Chosen Move Score: " << FavoriteMoveSoFarScore << "  ";
+  FavoriteMoveSoFar->print();
   cout << endl;
 
   /* logfile.close(); */
-  return FavoriteMoveSoFar;
+  return *FavoriteMoveSoFar;
 }
 
 float SpeedBot::Evaluate(Board thisBoard) {
@@ -152,24 +162,26 @@ float SpeedBot::Evaluate(Board thisBoard) {
 
   float evaluation = 0.0;
 
-  // Subtract 4*|n| for every n-shell on my StartSquares
+  // Unused piece penalty
+  // Subtract 4*|n| for every n-shell on my StartSquares 
+  // (add 4*|n| for every n-shell on their StartSquares)
   for (int iStartSquare=0; iStartSquare!=3; iStartSquare++) {
     Square thisStartSquare = thisBoard.getStartSquare(playerNum,iStartSquare);
     for (int x=abs(thisStartSquare.top()); x!=0; x--) {
-      evaluation-=4*x;
+      evaluation-=4*x*playerNum;
     }    
   }
-  // Add 4*|n| for every n-shell on his StartSquares
   for (int iStartSquare=0; iStartSquare!=3; iStartSquare++) {
     Square thisStartSquare = thisBoard.getStartSquare(opponent,iStartSquare);
     for (int x=abs(thisStartSquare.top()); x!=0; x--) {
-      evaluation+=4*x;
+      evaluation-=4*x*opponent;
     }    
   }
 
 
   // Add 100 points for every 3 in a row (that are "row-able")
   // Add  10 points for every 2 in a row (that are "row-able")
+  //  (Note: "row-able" == able to make a four in a row.  e.g., not the once-off-diagonal "row")
   // Check the rows
   for (int iRow=0; iRow != 4; iRow++) {
     int nMineInThisRow = 0;
@@ -182,14 +194,14 @@ float SpeedBot::Evaluate(Board thisBoard) {
 	nHisInThisRow++;
     }
     if (nMineInThisRow == 3) {
-      evaluation+=100;
+      evaluation+=100*playerNum;
     } else if (nMineInThisRow == 2) {
-      evaluation+=10;
+      evaluation+=10*playerNum;
     }
     if (nHisInThisRow == 3) {
-      evaluation-=100;
+      evaluation+=100*opponent;
     } else if (nHisInThisRow == 2) {
-      evaluation-=10;
+      evaluation+=10*opponent;
     }
   }
     
@@ -205,14 +217,14 @@ float SpeedBot::Evaluate(Board thisBoard) {
 	nHisInThisCol++;
     }
     if (nMineInThisCol == 3) {
-      evaluation+=100;
+      evaluation+=100*playerNum;
     } else if (nMineInThisCol == 2) {
-      evaluation+=10;
+      evaluation+=10*playerNum;
     }
     if (nHisInThisCol == 3) {
-      evaluation-=100;
+      evaluation+=100*opponent;
     } else if (nHisInThisCol == 2) {
-      evaluation-=10;
+      evaluation+=10*opponent;
     }
   }
 
@@ -235,14 +247,14 @@ float SpeedBot::Evaluate(Board thisBoard) {
 	nHisInThisDiag++;
     }
     if (nMineInThisDiag == 3) {
-      evaluation+=100;
+      evaluation+=100*playerNum;
     } else if (nMineInThisDiag == 2) {
-      evaluation+=10;
+      evaluation+=10*playerNum;
     }
     if (nHisInThisDiag == 3) {
-      evaluation-=100;
+      evaluation+=100*opponent;
     } else if (nHisInThisDiag == 2) {
-      evaluation-=10;
+      evaluation+=10*opponent;
     }
   }
 
@@ -257,10 +269,10 @@ float SpeedBot::Evaluate(Board thisBoard) {
 	   it != iStack.end() && it < iStack.end()-1;
 	   it++) {
 	if ((*it)*playerNum > 0) {
-	  evaluation-=1;
+	  evaluation-=1*playerNum;
 	} 
-	if ((*it)*playerNum < 0) {
-	  evaluation+=1;
+	if ((*it)*opponent > 0) {
+	  evaluation-=1*opponent;
 	}
       }
     }
@@ -545,7 +557,7 @@ float SpeedBot::alphaBeta(Board thisBoard, int depth, float alpha, float beta) {
     return Opponent*999999.9;
   }
   if (depth <= 0) {
-    return PlayerToMove*Evaluate(thisBoard);
+    return Evaluate(thisBoard);
   }
   vector<Move> LegalMoves = thisBoard.getAllLegalMoves(PlayerToMove);
 
